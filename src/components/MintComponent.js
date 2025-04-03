@@ -96,7 +96,7 @@ export default function MintComponent({ collection, ethPriceUSD }) {
             </p>
             
             <button 
-              onClick={handleShare}
+              onClick={() => handleShare(false)}
               className={styles.shareButton}
               title="Share to Warpcast"
             >
