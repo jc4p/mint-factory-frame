@@ -98,13 +98,10 @@ export async function POST(request) {
           if (cfData.result.variants && cfData.result.variants.length > 0) {
             optimizedImageUrl = cfData.result.variants[0];
             
-            // Create a 3:2 aspect ratio image for Farcaster Frame using Cloudflare Images transformations
-            // We'll use the URL transformation API instead of a pre-configured variant
-            // This enforces a 3:2 aspect ratio by setting width and height with fit=cover
-            const baseUrl = optimizedImageUrl.split('/cdn-cgi/imagedelivery/')[0];
-            
-            // Create a URL with transformation parameters (3:2 aspect ratio with width=1200, height=800)
-            frameImageUrl = `${baseUrl}/cdn-cgi/image/width=1200,height=800,fit=cover,gravity=auto,quality=80/${imageUrl}`;
+            // Look for the fcimage variant in the response
+            if (cfData.result.variants.includes(`fcimage`)) {
+              frameImageUrl = cfData.result.variants.find(variant => variant.includes('fcimage'));
+            }
           }
         }
       }
