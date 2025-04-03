@@ -114,6 +114,10 @@
   transition: background-color 0.2s;
 }
 
+.marginBottom {
+  margin-bottom: 24px;
+}
+
 .createButton:hover {
   background-color: var(--hover-color, #2980b9);
 }

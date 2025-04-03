@@ -73,7 +73,7 @@ export default function UserCollections() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>My Collections</h1>
-      <Link href="/" className={styles.createButton}>
+      <Link href="/" className={`${styles.createButton} ${styles.marginBottom}`}>
         Create New Collection
       </Link>
       <div className={styles.grid}>
