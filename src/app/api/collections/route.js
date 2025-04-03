@@ -3,7 +3,7 @@ import { sql } from '@vercel/postgres';
 import { uploadToR2, generateHash } from '@/lib/r2';
 
 export const runtime = 'edge';
-export const maxDuration = 90;
+export const maxDuration = 300;
 
 export async function POST(request) {
   try {
