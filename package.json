@@ -9,8 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.511.0",
+    "@farcaster/frame-sdk": "^0.0.32",
+    "@vercel/postgres": "^0.7.2",
+    "nanoid": "^5.0.6",
+    "next": "15.2.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.2.4"
+    "react-dom": "^19.0.0"
   }
 }

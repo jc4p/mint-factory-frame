@@ -1,168 +1,429 @@
 .page {
-  --gray-rgb: 0, 0, 0;
-  --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
-  --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-
-  display: grid;
-  grid-template-rows: 20px 1fr 20px;
+  --primary-color: #3498db;
+  --hover-color: #2980b9;
+  --success-color: #2ecc71;
+  --error-color: #e74c3c;
+  --background-light: #f8f9fa;
+  --border-color: #e0e0e0;
+  --text-color: #333;
+  
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-items: center;
-  min-height: 100svh;
-  padding: 80px;
-  gap: 64px;
-  font-family: var(--font-geist-sans);
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 30px 20px;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   .page {
-    --gray-rgb: 255, 255, 255;
-    --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
-    --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
+    --background-light: #1a1a1a;
+    --border-color: #444;
+    --text-color: #f0f0f0;
+  }
+  
+  .ethAddress {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .priceUSD {
+    color: #aaa;
+  }
+  
+  .ethLabel {
+    color: #aaa;
+  }
+  
+  .presetLabel {
+    color: #999;
+  }
+  
+  .toggleButton {
+    color: var(--primary-color);
+  }
+  
+  .presetButton {
+    border-color: #444;
+  }
+  
+  .presetButton:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
   }
 }
 
 .main {
+  max-width: 500px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  grid-row-start: 2;
+  gap: 30px;
+  padding: 0 16px;
 }
 
-.main ol {
-  font-family: var(--font-geist-mono);
-  padding-left: 0;
-  margin: 0;
-  font-size: 14px;
-  line-height: 24px;
-  letter-spacing: -0.01em;
-  list-style-position: inside;
-}
-
-.main li:not(:last-of-type) {
-  margin-bottom: 8px;
-}
-
-.main code {
-  font-family: inherit;
-  background: var(--gray-alpha-100);
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.ctas {
+.titleContainer {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
 }
 
-.ctas a {
-  appearance: none;
-  border-radius: 128px;
-  height: 48px;
-  padding: 0 20px;
+.title {
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 2.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.helpButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
   border: none;
-  border: 1px solid transparent;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  line-height: 20px;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: var(--background-light);
+  border-radius: 8px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal h3 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  font-family: var(--font-orbitron), sans-serif;
+}
+
+.modal p {
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.ethAddress {
+  font-family: var(--font-space-mono), monospace;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 8px 12px;
+  border-radius: 4px;
+  word-break: break-all;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.modalCloseButton {
+  align-self: flex-end;
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-orbitron), sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.modalCloseButton:hover {
+  background-color: var(--hover-color);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.uploadSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 5px;
+  cursor: pointer;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-light);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Use a pseudo-element for the hover effect */
+.dropzone:hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px dashed var(--primary-color);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.uploadPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.supportedFormats {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.errorMessage {
+  color: var(--error-color);
+  font-size: 0.9rem;
+  margin-top: 8px;
   font-weight: 500;
 }
 
-a.primary {
-  background: var(--foreground);
-  color: var(--background);
-  gap: 8px;
+.fileInput {
+  display: none;
 }
 
-a.secondary {
-  border-color: var(--gray-alpha-200);
-  min-width: 158px;
+.preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
-.footer {
-  grid-row-start: 3;
+.inputGroup {
   display: flex;
-  gap: 24px;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
 }
 
-.footer a {
+.input, .priceInput {
+  padding: 12px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--background-light);
+  color: var(--text-color);
+  transition: border-color 0.3s ease;
+  width: 100%;
+}
+
+.input:focus, .priceInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.priceRow {
   display: flex;
   align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.priceInputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 160px;
+  min-width: 160px;
+}
+
+.priceInput {
+  padding-right: 50px;
+}
+
+.ethLabel {
+  position: absolute;
+  right: 16px;
+  font-size: 0.9rem;
+  color: #888;
+  pointer-events: none;
+}
+
+.shortcutsToggle {
+  margin-top: 8px;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 0.85rem;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  display: inline-block;
+}
+
+.presetLabel {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.pricePresets {
+  display: flex;
   gap: 8px;
 }
 
-.footer img {
-  flex-shrink: 0;
+.presetButton {
+  background-color: var(--background-light);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  user-select: none;
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
+.presetButton:hover {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  /* Make hover effect immediate, no transition */
+}
 
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
+.priceUSD {
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
 
-  .footer a:hover {
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 16px;
+  font-family: var(--font-orbitron), sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.button:hover {
+  background-color: var(--hover-color);
+}
+
+.button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 @media (max-width: 600px) {
   .page {
-    padding: 32px;
-    padding-bottom: 80px;
+    padding: 20px 16px;
   }
-
-  .main {
-    align-items: center;
+  
+  .titleContainer {
+    padding: 0 30px;
   }
-
-  .main ol {
-    text-align: center;
+  
+  .title {
+    font-size: 1.8rem;
+    margin-right: 8px;
   }
-
-  .ctas {
-    flex-direction: column;
-  }
-
-  .ctas a {
+  
+  .helpButton {
+    width: 24px;
+    height: 24px;
     font-size: 14px;
-    height: 40px;
-    padding: 0 16px;
   }
-
-  a.secondary {
-    min-width: auto;
+  
+  .dropzone {
+    height: 180px;
   }
-
-  .footer {
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
+  
+  .form {
+    gap: 18px;
   }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
+  
+  .inputGroup {
+    gap: 6px;
+  }
+  
+  .priceRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .priceInputContainer {
+    width: 100%;
+  }
+  
+  .pricePresets {
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .presetButton {
+    flex: 1;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 0.8rem;
   }
 }
