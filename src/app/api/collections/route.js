@@ -112,11 +112,8 @@ export async function POST(request) {
           // Get the direct delivery URL from the response if available
           if (cfData.result.variants && cfData.result.variants.length > 0) {
             optimizedImageUrl = cfData.result.variants[0];
-            
-            // Look for the fcimage variant in the response
-            if (cfData.result.variants.includes(`fcimage`)) {
-              frameImageUrl = cfData.result.variants.find(variant => variant.includes('fcimage'));
-            }
+
+            frameImageUrl = optimizedImageUrl.replace('/public', '/fcimage');
           }
         }
       }
