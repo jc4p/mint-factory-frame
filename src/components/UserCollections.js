@@ -73,6 +73,9 @@ export default function UserCollections() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>My Collections</h1>
+      <Link href="/" className={styles.createButton}>
+        Create New Collection
+      </Link>
       <div className={styles.grid}>
         {collections.map((collection) => (
           <Link 
