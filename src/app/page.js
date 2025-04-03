@@ -30,9 +30,7 @@ async function getEthPriceUSD() {
     params.append('symbols', 'ETH');
     
     const urlWithParams = `${fetchURL}?${params.toString()}`;
-    
-    console.log('Fetching ETH price from:', urlWithParams);
-    
+        
     const response = await fetch(urlWithParams, {
       method: 'GET',
       headers: {
@@ -48,7 +46,6 @@ async function getEthPriceUSD() {
     }
     
     const data = await response.json();
-    console.log('Alchemy API response:', JSON.stringify(data, null, 2));
     
     // Extract price based on the actual API response structure
     let price = null;
@@ -63,7 +60,7 @@ async function getEthPriceUSD() {
       }
     }
     
-    console.log('Extracted ETH price:', price);
+    console.log('Alchemy ETH price:', price);
     
     return price; // Return null if we can't extract the price
   } catch (error) {

@@ -59,7 +59,7 @@ export default function NFTCreator({ ethPriceUSD }) {
             setWalletError('No ETH wallet connected to your Farcaster account. Please connect a wallet in your Farcaster settings.');
           }
           
-          setCollectionName(`${userData.username || 'My'}'s Awesome NFT`);
+          setCollectionName(`${userData.username || userData.fid}'s Awesome NFT`);
           
           console.log("Set user data from API:", userData);
         } else {
@@ -306,7 +306,7 @@ Redirecting to mint page...`);
                 <div className={styles.uploadPrompt}>
                   <p>Click to upload an image</p>
                   <p className={styles.supportedFormats}>
-                    Supports all image formats, including HEIC from iPhones
+                    Any static image (no GIFs)
                   </p>
                   {imageError && (
                     <p className={styles.errorMessage}>
@@ -477,7 +477,7 @@ Redirecting to mint page...`);
                 The minting fees will be sent directly to your Warplet:
               </p>
               <p className={styles.ethAddress}>
-                0x0db12C0A67bc5B8942ea3126a465d7a0b23126C7
+                {creatorAddress}
               </p>
               <button 
                 onClick={() => setShowModal(false)} 
