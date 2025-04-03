@@ -8,7 +8,7 @@ import { getUserByFid } from '@/lib/neynar';
  */
 export async function GET(request, { params }) {
   try {
-    const { fid } = params;
+    const { fid } = await params;
     
     if (!fid) {
       return new Response(JSON.stringify({ error: 'FID is required' }), {
