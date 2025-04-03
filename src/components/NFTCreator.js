@@ -151,6 +151,7 @@ export default function NFTCreator({ ethPriceUSD }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
+  const [isCreatingCollection, setIsCreatingCollection] = useState(false);
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -191,6 +192,9 @@ export default function NFTCreator({ ethPriceUSD }) {
       
       console.log(`Payment successful with transaction hash: ${paymentResult.txHash}`);
       
+      // Update state to show collection creation status
+      setIsCreatingCollection(true);
+      
       // Create FormData to send to API
       const formData = new FormData();
       formData.append('image', image);
@@ -220,18 +224,6 @@ export default function NFTCreator({ ethPriceUSD }) {
       const result = await response.json();
       console.log("Collection created:", result);
       
-      // Get contract address if available
-      const contractInfo = result.collection.contractAddress 
-        ? `\n\nContract address: ${result.collection.contractAddress}` 
-        : '';
-      
-      // Show success message with additional information about the collection
-      alert(`Collection "${collectionName}" created successfully!
-      
-View your collection metadata at: /tokens/${result.collection.hash}/1
-
-Redirecting to mint page...`);
-      
       // Redirect to the mint page
       window.location.href = `/mint/${result.collection.hash}`;
       
@@ -248,6 +240,7 @@ Redirecting to mint page...`);
       }
     } finally {
       setIsSubmitting(false);
+      setIsCreatingCollection(false);
     }
   };
 
@@ -461,8 +454,13 @@ Redirecting to mint page...`);
             className={styles.button}
             disabled={isSubmitting || !!walletError}
           >
-            {isSubmitting ? 'Processing Payment...' : 'Create Collection ($10)'}
+            {isCreatingCollection ? 'Creating NFT Collection...' : isSubmitting ? 'Processing Payment...' : 'Create Collection ($10)'}
           </button>
+          {isCreatingCollection && (
+            <p className={styles.helpText} style={{ textAlign: 'center', marginTop: '10px', color: '#666' }}>
+              Can take up to 30s, please don't close this page
+            </p>
+          )}
         </form>
         
         {showModal && (

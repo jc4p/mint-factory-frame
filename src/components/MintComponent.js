@@ -4,11 +4,16 @@ import { useState, useEffect } from 'react';
 import styles from './MintComponent.module.css';
 import { shareToWarpcast, mintNFT } from '@/lib/frame';
 
-export default function MintComponent({ collection }) {
+export default function MintComponent({ collection, ethPriceUSD }) {
   const [isMinting, setIsMinting] = useState(false);
   const [txHash, setTxHash] = useState(null);
   const [baseUrl, setBaseUrl] = useState('');
   const [mintError, setMintError] = useState(null);
+  
+  // Calculate USD price
+  const priceInUSD = ethPriceUSD && parseFloat(collection.price) > 0 
+    ? (parseFloat(collection.price) * ethPriceUSD).toFixed(2)
+    : null;
   
   // Get base URL for sharing
   useEffect(() => {
@@ -30,8 +35,8 @@ export default function MintComponent({ collection }) {
       const shareUrl = `${baseUrl}/mint/${collection.hash}`;
       // Different message based on whether we're sharing after successful mint
       const shareText = isSuccess 
-        ? `I just minted "${collection.collection_name}"` 
-        : `Mint "${collection.collection_name}" NFT created by @${collection.username}`;
+        ? `I just minted "${collection.collection_name} by @${collection.username}"` 
+        : `Check out @${collection.username}'s NFT Collection: "${collection.collection_name}"`;
       
       await shareToWarpcast(shareUrl, shareText);
     } catch (error) {
@@ -100,14 +105,14 @@ export default function MintComponent({ collection }) {
           </div>
           
           <div className={styles.details}>
-            {collection.max_mints && (
+            {collection.max_mints && collection.max_mints > 0 && (
               <p className={styles.maxMints}>
                 Limited to {collection.max_mints} mints
               </p>
             )}
             
             <p className={styles.price}>
-              Price: {parseFloat(collection.price) === 0 ? 'Free' : `${collection.price} ETH`}
+              Price: {parseFloat(collection.price) === 0 ? 'Free' : `${parseFloat(collection.price)} ETH${priceInUSD ? ` (≈ $${priceInUSD})` : ''}`}
             </p>
           </div>
           
@@ -141,7 +146,7 @@ export default function MintComponent({ collection }) {
                 {isMinting 
                   ? 'Minting...' 
                   : `Mint NFT${parseFloat(collection.price) > 0
-                      ? ` for ${parseFloat(collection.price)} ETH`
+                      ? ` for ${priceInUSD ? `$${priceInUSD}` : `${parseFloat(collection.price)} ETH`}`
                       : ''}`
                 }
               </button>
