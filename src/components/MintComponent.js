@@ -35,7 +35,7 @@ export default function MintComponent({ collection, ethPriceUSD }) {
       const shareUrl = `${baseUrl}/mint/${collection.hash}`;
       // Different message based on whether we're sharing after successful mint
       const shareText = isSuccess 
-        ? `I just minted "${collection.collection_name} by @${collection.username}"` 
+        ? `I just minted "${collection.collection_name}" by @${collection.username}` 
         : `Check out @${collection.username}'s NFT Collection: "${collection.collection_name}"`;
       
       await shareToWarpcast(shareUrl, shareText);
