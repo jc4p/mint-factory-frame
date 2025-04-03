@@ -80,6 +80,31 @@
   font-weight: 700;
 }
 
+.headerButtons {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.myCollectionsButton {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.myCollectionsButton:hover {
+  background-color: var(--hover-color);
+}
+
 .helpButton {
   width: 28px;
   height: 28px;
@@ -93,10 +118,6 @@
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .modalOverlay {
@@ -380,11 +401,25 @@
   
   .titleContainer {
     padding: 0 30px;
+    flex-direction: column;
+    margin-bottom: 30px;
   }
   
   .title {
     font-size: 1.8rem;
-    margin-right: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .headerButtons {
+    position: static;
+    transform: none;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .myCollectionsButton {
+    font-size: 0.8rem;
+    padding: 5px 10px;
   }
   
   .helpButton {

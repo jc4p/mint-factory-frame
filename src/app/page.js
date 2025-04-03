@@ -74,9 +74,7 @@ async function getEthPriceUSD() {
 
 export default async function Home() {
   const ethPrice = await getEthPriceUSD();
-  
-  console.log("Page component received ETH price:", ethPrice);
-  
+
   return (
     <div>
       <NFTCreator ethPriceUSD={ethPrice} />

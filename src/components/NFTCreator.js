@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import styles from "../app/page.module.css";
 import { sendPaymentForCollection } from "@/lib/frame";
 
@@ -255,14 +256,22 @@ Redirecting to mint page...`);
       <main className={styles.main}>
         <div className={styles.titleContainer}>
           <h1 className={styles.title}>NFT Factory</h1>
-          <button 
-            type="button"
-            className={styles.helpButton}
-            onClick={() => setShowModal(true)}
-            aria-label="Help"
-          >
-            ?
-          </button>
+          <div className={styles.headerButtons}>
+            <Link 
+              href="/my-collections" 
+              className={styles.myCollectionsButton}
+            >
+              My Collections
+            </Link>
+            <button 
+              type="button"
+              className={styles.helpButton}
+              onClick={() => setShowModal(true)}
+              aria-label="Help"
+            >
+              ?
+            </button>
+          </div>
         </div>
         
         <form onSubmit={handleSubmit} className={styles.form}>
