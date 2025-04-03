@@ -7,8 +7,11 @@ export const maxDuration = 90;
 
 export async function POST(request) {
   try {
+    console.log('API Route: Starting collection creation');
     // Parse multipart form data
     const formData = await request.formData();
+    console.log('API Route: Form data received');
+    
     const image = formData.get('image');
     const fid = formData.get('fid');
     const creatorAddress = formData.get('creatorAddress');
@@ -16,10 +19,22 @@ export async function POST(request) {
     const price = formData.get('price');
     const maxMints = formData.get('maxMints');
     const username = formData.get('username');
-    const paymentTxHash = formData.get('paymentTxHash'); // New field for payment transaction hash
+    const paymentTxHash = formData.get('paymentTxHash');
+    
+    console.log('API Route: Form data parsed:', {
+      hasImage: !!image,
+      fid,
+      creatorAddress,
+      collectionName,
+      price,
+      maxMints,
+      username,
+      hasPaymentTxHash: !!paymentTxHash
+    });
     
     // Validate required fields
     if (!image || !fid || !creatorAddress || !collectionName || !username) {
+      console.log('API Route: Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -141,10 +156,26 @@ export async function POST(request) {
     // Call the middleware to create the collection contract
     let contractAddress = null;
     try {
+      console.log('API Route: Starting middleware call for contract creation');
       const middlewareUrl = `${process.env.MIDDLEWARE_URL}/create-collection`;
+      console.log('API Route: Middleware URL:', middlewareUrl);
       
       // Construct the base URI for the collection tokens
       const baseURI = `${process.env.NEXT_PUBLIC_BASE_URL}/tokens/${collectionHash}/`;
+      console.log('API Route: Base URI:', baseURI);
+      
+      const middlewarePayload = {
+        hash: collectionHash,
+        fid: numericFid,
+        creatorAddress: creatorAddress,
+        collectionName: collectionName,
+        baseURI: baseURI,
+        imageUrl: optimizedImageUrl,
+        price: price || '0.00005 ether',
+        maxMints: maxMints || 0,
+        symbol: symbol
+      };
+      console.log('API Route: Middleware payload:', middlewarePayload);
       
       const middlewareResponse = await fetch(middlewareUrl, {
         method: 'POST',
@@ -152,22 +183,14 @@ export async function POST(request) {
           'Content-Type': 'application/json',
           'X-Api-Key': process.env.MIDDLEWARE_API_KEY
         },
-        body: JSON.stringify({
-          hash: collectionHash,
-          fid: numericFid,
-          creatorAddress: creatorAddress,
-          collectionName: collectionName,
-          baseURI: baseURI,
-          imageUrl: optimizedImageUrl,
-          price: price || '0.00005 ether',
-          maxMints: maxMints || 0,
-          symbol: symbol
-        })
+        body: JSON.stringify(middlewarePayload)
       });
+      
+      console.log('API Route: Middleware response status:', middlewareResponse.status);
       
       if (!middlewareResponse.ok) {
         const errorText = await middlewareResponse.text();
-        console.error('Middleware API error:', errorText);
+        console.error('API Route: Middleware API error:', errorText);
         return NextResponse.json(
           { error: 'Contract creation failed. Please try again.' },
           { status: 500 }
@@ -175,8 +198,10 @@ export async function POST(request) {
       } 
       
       const middlewareData = await middlewareResponse.json();
+      console.log('API Route: Middleware response data:', middlewareData);
+      
       if (!middlewareData.contractAddress) {
-        console.error('Middleware did not return a contract address');
+        console.error('API Route: Middleware did not return a contract address');
         return NextResponse.json(
           { error: 'Contract creation failed. No contract address returned.' },
           { status: 500 }
@@ -184,9 +209,9 @@ export async function POST(request) {
       }
       
       contractAddress = middlewareData.contractAddress;
-      console.log(`Collection contract deployed at: ${contractAddress}`);
+      console.log('API Route: Collection contract deployed at:', contractAddress);
     } catch (error) {
-      console.error('Error calling middleware:', error);
+      console.error('API Route: Error calling middleware:', error);
       return NextResponse.json(
         { error: 'Contract creation failed due to an unexpected error.' },
         { status: 500 }
