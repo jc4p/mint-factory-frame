@@ -105,11 +105,11 @@ export default function MintComponent({ collection, ethPriceUSD }) {
           </div>
           
           <div className={styles.details}>
-            {collection.max_mints && collection.max_mints > 0 && (
+            {collection.max_mints && collection.max_mints > 0 ? (
               <p className={styles.maxMints}>
                 Limited to {collection.max_mints} mints
               </p>
-            )}
+            ) : null}
             
             <p className={styles.price}>
               Price: {parseFloat(collection.price) === 0 ? 'Free' : `${parseFloat(collection.price)} ETH${priceInUSD ? ` (≈ $${priceInUSD})` : ''}`}
