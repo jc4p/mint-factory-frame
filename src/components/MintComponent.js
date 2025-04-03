@@ -141,7 +141,7 @@ export default function MintComponent({ collection }) {
                 {isMinting 
                   ? 'Minting...' 
                   : `Mint NFT${parseFloat(collection.price) > 0
-                      ? ` for ${parseFloat(collection.price).toFixed(4)} ETH`
+                      ? ` for ${parseFloat(collection.price)} ETH`
                       : ''}`
                 }
               </button>

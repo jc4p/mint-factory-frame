@@ -332,7 +332,7 @@ Redirecting to mint page...`);
                 <input
                   id="price"
                   type="number"
-                  step="0.0001"
+                  step="any"
                   min="0"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
@@ -386,7 +386,8 @@ Redirecting to mint page...`);
                         const rawEthAmount = 5 / ethPriceUSD;
                         // Round to nearest 0.0005
                         const roundedEth = Math.round(rawEthAmount * 2000) / 2000;
-                        setPrice(roundedEth.toFixed(4));
+                        // Allow more precision in the display
+                        setPrice(roundedEth.toString());
                       }
                     }}
                   >
@@ -401,7 +402,8 @@ Redirecting to mint page...`);
                         const rawEthAmount = 10 / ethPriceUSD;
                         // Round to nearest 0.0005
                         const roundedEth = Math.round(rawEthAmount * 2000) / 2000;
-                        setPrice(roundedEth.toFixed(4));
+                        // Allow more precision in the display
+                        setPrice(roundedEth.toString());
                       }
                     }}
                   >
