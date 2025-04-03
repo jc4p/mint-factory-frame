@@ -17,7 +17,7 @@ export async function GET(request, { params }) {
     
     // Parse tokenId to ensure it's a number
     const tokenNumber = parseInt(tokenId);
-    if (isNaN(tokenNumber) || tokenNumber < 1) {
+    if (isNaN(tokenNumber)) {
       return NextResponse.json({ error: 'Invalid token ID' }, { status: 400 });
     }
     
@@ -32,11 +32,6 @@ export async function GET(request, { params }) {
     }
     
     const collection = result.rows[0];
-    
-    // Check if the requested token is within the maximum mints
-    if (collection.max_mints !== null && tokenNumber > collection.max_mints) {
-      return NextResponse.json({ error: 'Token ID exceeds maximum mints' }, { status: 404 });
-    }
     
     // Generate the metadata
     const metadata = generateNftMetadata(collection, tokenId);
