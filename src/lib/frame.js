@@ -214,3 +214,94 @@ export async function sendPaymentForCollection(ethPriceUSD) {
     };
   }
 }
+
+/**
+ * Checks if minting is available for a collection and returns total supply
+ * @param {string} contractAddress - The contract address to interact with
+ * @returns {Promise<{success: boolean, hasMintingAvailable?: boolean, totalSupply?: string, error?: string}>}
+ */
+export async function checkMintingAvailability(contractAddress) {
+  try {
+    // First, try to switch to Base network if not already on it
+    const chainId = await frame.sdk.wallet.ethProvider.request({
+      method: 'eth_chainId'
+    });
+    
+    const chainIdDecimal = typeof chainId === 'number' ? chainId : parseInt(chainId, 16);
+    
+    // Base Mainnet chain ID is 8453 (0x2105 in hex)
+    if (chainIdDecimal !== 8453) {
+      console.log(`Switching to Base network from chain ID ${chainIdDecimal}`);
+      await frame.sdk.wallet.ethProvider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x2105' }] // Base mainnet chainId
+      });
+    }
+    
+    // Get the user's wallet address
+    const accounts = await frame.sdk.wallet.ethProvider.request({
+      method: 'eth_requestAccounts'
+    });
+    
+    if (!accounts || !accounts[0]) {
+      throw new Error('No wallet connected');
+    }
+    
+    // Create the mintingAvailable function signature (keccak256('mintingAvailable()'))
+    const mintingAvailableFunctionSignature = '0x8a2daaf7';
+    
+    // Call the contract method for mintingAvailable
+    const mintingAvailableResult = await frame.sdk.wallet.ethProvider.request({
+      method: 'eth_call',
+      params: [{
+        from: accounts[0],
+        to: contractAddress,
+        data: mintingAvailableFunctionSignature
+      }, 'latest']
+    });
+    
+    console.log('Raw result from mintingAvailable:', mintingAvailableResult);
+    
+    // Parse the result (it's a tuple of bool and uint256)
+    // The first 32 bytes are the bool
+    const hasMintingAvailable = mintingAvailableResult.substring(0, 66) === '0x0000000000000000000000000000000000000000000000000000000000000001';
+    
+    // Create the totalSupply function signature (keccak256('totalSupply()'))
+    const totalSupplyFunctionSignature = '0x18160ddd';
+    
+    // Call the contract method for totalSupply
+    const totalSupplyResult = await frame.sdk.wallet.ethProvider.request({
+      method: 'eth_call',
+      params: [{
+        from: accounts[0],
+        to: contractAddress,
+        data: totalSupplyFunctionSignature
+      }, 'latest']
+    });
+    
+    console.log('Raw result from totalSupply:', totalSupplyResult);
+    
+    // Parse the totalSupply result
+    let totalSupply;
+    try {
+      totalSupply = BigInt(totalSupplyResult).toString();
+    } catch (error) {
+      console.error('Error parsing totalSupply:', error);
+      totalSupply = "0"; // Default to 0 if parsing fails
+    }
+    
+    console.log('Minting availability check:', { hasMintingAvailable, totalSupply });
+    
+    return {
+      success: true,
+      hasMintingAvailable,
+      totalSupply
+    };
+  } catch (error) {
+    console.error('Error checking minting availability:', error);
+    return {
+      success: false,
+      error: error.message || 'Failed to check minting availability'
+    };
+  }
+}

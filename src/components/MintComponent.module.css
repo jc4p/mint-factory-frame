@@ -82,16 +82,24 @@
 
 .details {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  padding: 16px 0;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.maxMints, .price {
+.maxMints {
+  font-size: 14px;
+  color: #666;
   margin: 0;
-  font-size: 0.9rem;
+  padding: 0;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  padding: 0;
 }
 
 .contractInfo {
@@ -146,25 +154,36 @@
 }
 
 .mintButton {
-  background-color: #3498db;
+  background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 8px;
-  padding: 14px 28px;
-  font-family: var(--font-orbitron), sans-serif;
-  font-size: 1rem;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
   cursor: pointer;
-  width: 100%;
-  transition: background-color 0.2s;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
 .mintButton:hover {
-  background-color: #2980b9;
+  background-color: #45a049;
 }
 
 .mintButton:disabled {
-  background-color: #ccc;
+  background-color: #cccccc;
   cursor: not-allowed;
+}
+
+.disabledButton {
+  background-color: #f44336 !important;
+  cursor: not-allowed !important;
+}
+
+.disabledButton:hover {
+  background-color: #d32f2f !important;
 }
 
 .success {

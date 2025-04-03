@@ -69,7 +69,7 @@ async function getEthPriceUSD() {
 }
 
 export async function generateMetadata({ params }) {
-  const { hash } = params;
+  const { hash } = (await params);
   const collection = await getCollectionData(hash);
   
   if (!collection) {
@@ -101,7 +101,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function MintPage({ params }) {
-  const { hash } = params;
+  const { hash } = (await params);
   const collection = await getCollectionData(hash);
   const ethPrice = await getEthPriceUSD();
   

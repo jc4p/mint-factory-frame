@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import styles from './MintComponent.module.css';
-import { shareToWarpcast, mintNFT } from '@/lib/frame';
+import { shareToWarpcast, mintNFT, checkMintingAvailability } from '@/lib/frame';
 
 export default function MintComponent({ collection, ethPriceUSD }) {
   const [isMinting, setIsMinting] = useState(false);
   const [txHash, setTxHash] = useState(null);
   const [baseUrl, setBaseUrl] = useState('');
   const [mintError, setMintError] = useState(null);
+  const [mintingAvailable, setMintingAvailable] = useState(true);
+  const [totalSupply, setTotalSupply] = useState(null);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(true);
   
   // Calculate USD price
   const priceInUSD = ethPriceUSD && parseFloat(collection.price) > 0 
@@ -28,6 +31,34 @@ export default function MintComponent({ collection, ethPriceUSD }) {
       }
     }
   }, []);
+  
+  // Check minting availability when component loads
+  useEffect(() => {    
+    const checkAvailability = async () => {
+      if (!collection.contract_address) return;
+      
+      setIsCheckingAvailability(true);
+      try {
+        const result = await checkMintingAvailability(collection.contract_address);
+        if (result.success) {
+          setMintingAvailable(result.hasMintingAvailable);
+          setTotalSupply(result.totalSupply);
+        } else {
+          console.error('Failed to check minting availability:', result.error);
+          // Default to allowing minting if check fails
+          setMintingAvailable(true);
+        }
+      } catch (error) {
+        console.error('Error checking minting availability:', error);
+        // Default to allowing minting if check fails
+        setMintingAvailable(true);
+      } finally {
+        setIsCheckingAvailability(false);
+      }
+    };
+    
+    checkAvailability();
+  }, [collection.contract_address]);
   
   // Handle sharing the mint page to Warpcast
   const handleShare = async (isSuccess = false) => {
@@ -55,6 +86,11 @@ export default function MintComponent({ collection, ethPriceUSD }) {
         throw new Error('No contract address available for this collection');
       }
       
+      // Check if minting is still available before proceeding
+      if (!mintingAvailable) {
+        throw new Error('Minting is no longer available for this collection');
+      }
+      
       console.log(`Minting NFT from collection ${collection.hash} at contract ${collection.contract_address}`);
       
       // Get the price from the collection (convert to ETH if needed)
@@ -65,6 +101,13 @@ export default function MintComponent({ collection, ethPriceUSD }) {
       
       if (result.success && result.txHash) {
         setTxHash(result.txHash);
+        
+        // Update minting availability after successful mint
+        const availabilityResult = await checkMintingAvailability(collection.contract_address);
+        if (availabilityResult.success) {
+          setMintingAvailable(availabilityResult.hasMintingAvailable);
+          setTotalSupply(availabilityResult.totalSupply);
+        }
       } else {
         throw new Error(result.error || 'Failed to mint NFT');
       }
@@ -75,6 +118,43 @@ export default function MintComponent({ collection, ethPriceUSD }) {
       setIsMinting(false);
     }
   };
+  
+  // Calculate minted tokens and determine if minting should be available
+  const calculateMintedTokens = () => {
+    if (!collection.max_mints) return { displayText: null, isSoldOut: false };
+    
+    // If we don't have total supply data, just show the max mints
+    if (!totalSupply) return { displayText: `Limited to ${collection.max_mints} mints`, isSoldOut: false };
+    
+    try {
+      const maxMints = parseInt(collection.max_mints);
+      const currentSupply = parseInt(totalSupply);
+      
+      if (isNaN(maxMints) || isNaN(currentSupply)) {
+        return { displayText: `Limited to ${collection.max_mints} mints`, isSoldOut: false };
+      }
+      
+      // If max_mints is 0, it means unlimited
+      if (maxMints === 0) {
+        return { displayText: `${currentSupply} minted (unlimited)`, isSoldOut: false };
+      }
+      
+      // If current supply is at or above max, consider it sold out
+      if (currentSupply >= maxMints) {
+        return { displayText: `${maxMints}/${maxMints} minted`, isSoldOut: true };
+      }
+      
+      return { displayText: `${currentSupply}/${maxMints} minted`, isSoldOut: false };
+    } catch (error) {
+      console.error('Error calculating minted tokens:', error);
+      return { displayText: `Limited to ${collection.max_mints} mints`, isSoldOut: false };
+    }
+  };
+  
+  const { displayText: mintedTokens, isSoldOut } = calculateMintedTokens();
+  
+  // Determine if minting should be available based on both contract status and our calculations
+  const isMintingDisabled = isMinting || !mintingAvailable || isCheckingAvailability || isSoldOut;
   
   return (
     <div className={styles.container}>
@@ -107,7 +187,7 @@ export default function MintComponent({ collection, ethPriceUSD }) {
           <div className={styles.details}>
             {collection.max_mints && collection.max_mints > 0 ? (
               <p className={styles.maxMints}>
-                Limited to {collection.max_mints} mints
+                {mintedTokens}
               </p>
             ) : null}
             
@@ -140,14 +220,18 @@ export default function MintComponent({ collection, ethPriceUSD }) {
               )}
               <button 
                 onClick={handleMint} 
-                disabled={isMinting}
-                className={styles.mintButton}
+                disabled={isMintingDisabled}
+                className={`${styles.mintButton} ${isMintingDisabled ? styles.disabledButton : ''}`}
               >
-                {isMinting 
-                  ? 'Minting...' 
-                  : `Mint NFT${parseFloat(collection.price) > 0
-                      ? ` for ${priceInUSD ? `$${priceInUSD}` : `${parseFloat(collection.price)} ETH`}`
-                      : ''}`
+                {isCheckingAvailability 
+                  ? 'Checking availability...' 
+                  : isMinting 
+                    ? 'Minting...' 
+                    : isMintingDisabled 
+                      ? 'Sold Out' 
+                      : `Mint NFT${parseFloat(collection.price) > 0
+                          ? ` for ${priceInUSD ? `$${priceInUSD}` : `${parseFloat(collection.price)} ETH`}`
+                          : ''}`
                 }
               </button>
             </div>
