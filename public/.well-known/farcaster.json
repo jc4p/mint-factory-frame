@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjk3NzIzMywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGE2N0JhMDI4MTIzMWVCOUUyZWE0Y0Y5Nzg5NGMwYjBiNUI4MDFDYzYifQ",
+    "payload": "eyJkb21haW4iOiJuZnQtZmFjdG9yeS5rYXNyYS5jb2RlcyJ9",
+    "signature": "MHgyMDZlMjVmNDNhYjU3MTFlYjE5MjhkNzUyMWIzMWYwNGI2M2I5ZDM2NDM5MTYzNWQ1MGZiMWYwNGZkYTQ2YWE3MjYwZWViNWQ2NDc2NGE2NjA2MGRiMDQxNWJhODdhYzg4Yzc4NjY4OGQ5OGFiYjMxYmJmZGZjMjg1MjU5YzFhNzFj"
+  },
+  "frame": {
+    "version": "1",
+    "name": "NFT Factory",
+    "iconUrl": "https://cover-art.kasra.codes/nft-factory-square.png",
+    "homeUrl": "https://nft-factory.kasra.codes",
+    "imageUrl": "https://cover-art.kasra.codes/nft-factory-rectangle.png",
+    "buttonTitle": "Create NFT",
+    "splashImageUrl": "https://cover-art.kasra.codes/nft-factory-square.png",
+    "splashBackgroundColor": "#FFFFFF"
+  }
+}

@@ -11,7 +11,7 @@ export const metadata = {
         title: "Create NFT",
         action: {
           type: "launch_frame",
-          name: "nft-factory",
+          name: "NFT Factory",
           url: process.env.NEXT_PUBLIC_BASE_URL || 'https://nft-factory.kasra.codes',
           splashImageUrl: 'https://cover-art.kasra.codes/nft-factory-square.png',
           splashBackgroundColor: "#FFFFFF"
