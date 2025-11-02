@@ -14,10 +14,10 @@ export default function NFTCreator({ ethPriceUSD }) {
   const [fid, setFid] = useState("");
   const [creatorAddress, setCreatorAddress] = useState("");
   const [collectionName, setCollectionName] = useState("");
-  const [price, setPrice] = useState("0.0025");
+  const [price, setPrice] = useState("0.0005");
   const [walletError, setWalletError] = useState(null);
   const [userDataError, setUserDataError] = useState(null);
-  const initialUsdPrice = ethPriceUSD ? (0.0025 * ethPriceUSD).toFixed(2) : "ETH Price Not Available";
+  const initialUsdPrice = ethPriceUSD ? (0.0005 * ethPriceUSD).toFixed(2) : "ETH Price Not Available";
   const [priceUSD, setPriceUSD] = useState(initialUsdPrice);
   const [showModal, setShowModal] = useState(false);
   const [showPriceShortcuts, setShowPriceShortcuts] = useState(false);
@@ -69,7 +69,7 @@ export default function NFTCreator({ ethPriceUSD }) {
         } else {
           // No frame context available - show error instead of using fallback
           console.log("No frame context available");
-          setUserDataError('Please access this page through Warpcast to create a collection.');
+          setUserDataError('Please access this page through Farcaster to create a collection.');
           setFid("");
           setUsername("");
           setCreatorAddress("");
@@ -77,7 +77,7 @@ export default function NFTCreator({ ethPriceUSD }) {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-        setUserDataError('Failed to load your Farcaster data. Please try again or access through Warpcast.');
+        setUserDataError('Failed to load your Farcaster data. Please try again or access through Farcaster.');
         setFid("");
         setUsername("");
         setCreatorAddress("");
@@ -274,7 +274,7 @@ export default function NFTCreator({ ethPriceUSD }) {
           <div className={styles.errorContainer}>
             <p className={styles.errorMessage}>{userDataError}</p>
             <p className={styles.helpText}>
-              This app requires Farcaster authentication. Please access it through Warpcast to create collections.
+              This app requires Farcaster authentication. Please access it through Farcaster to create collections.
             </p>
           </div>
         ) : (
@@ -340,7 +340,7 @@ export default function NFTCreator({ ethPriceUSD }) {
                     min="0"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    placeholder="0.0025"
+                    placeholder="0.0005"
                     required
                     className={styles.priceInput}
                   />
@@ -380,6 +380,22 @@ export default function NFTCreator({ ethPriceUSD }) {
                       }}
                     >
                       Free
+                    </span>
+                    <span 
+                      className={styles.presetButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (ethPriceUSD) {
+                          // Calculate raw ETH value
+                          const rawEthAmount = 1 / ethPriceUSD;
+                          // Round to nearest 0.0005
+                          const roundedEth = Math.round(rawEthAmount * 2000) / 2000;
+                          // Allow more precision in the display
+                          setPrice(roundedEth.toString());
+                        }
+                      }}
+                    >
+                      $1
                     </span>
                     <span 
                       className={styles.presetButton}
@@ -460,12 +476,12 @@ export default function NFTCreator({ ethPriceUSD }) {
               </div>
             )}
             
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={styles.button}
               disabled={isSubmitting || !!walletError}
             >
-              {isCreatingCollection ? 'Creating NFT Collection...' : isSubmitting ? 'Processing Payment...' : 'Create Collection ($10)'}
+              {isCreatingCollection ? 'Creating NFT Collection...' : isSubmitting ? 'Processing Payment...' : 'Create Collection ($5)'}
             </button>
             {isCreatingCollection && (
               <p className={styles.helpText} style={{ textAlign: 'center', marginTop: '10px', color: '#666' }}>
@@ -483,16 +499,16 @@ export default function NFTCreator({ ethPriceUSD }) {
                 This tool is ONLY for making static image NFTs - every person gets the same image in their wallet.
               </p>
               <p>
-                Creation cost is one-time $10 fee.
+                Creation cost is one-time $5 fee which covers contract deployment and image hosting.
               </p>
               <p>
-                The minting fees will be sent directly to your Warplet:
+                The minting fees will be sent directly to your Farcaster account wallet:
               </p>
               <p className={styles.ethAddress}>
                 {creatorAddress}
               </p>
-              <button 
-                onClick={() => setShowModal(false)} 
+              <button
+                onClick={() => setShowModal(false)}
                 className={styles.modalCloseButton}
               >
                 Close

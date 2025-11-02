@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { uploadToR2, generateHash } from '@/lib/r2';
+import { validatePayment } from '@/lib/validatePayment';
+import { getEthPriceUSD } from '@/lib/ethPrice';
 
 export const runtime = 'edge';
 export const maxDuration = 300;
@@ -33,18 +35,39 @@ export async function POST(request) {
     });
     
     // Validate required fields
-    if (!image || !fid || !creatorAddress || !collectionName || !username) {
+    if (!image || !fid || !creatorAddress || !collectionName || !username || !paymentTxHash) {
       console.log('API Route: Missing required fields');
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields. Payment transaction hash is required.' },
         { status: 400 }
       );
     }
-    
-    // Log payment transaction hash if provided (not required yet)
-    if (paymentTxHash) {
-      console.log(`Payment transaction hash: ${paymentTxHash}`);
+
+    console.log(`Payment transaction hash: ${paymentTxHash}`);
+
+    // Get current ETH price for payment validation
+    const ethPriceUSD = await getEthPriceUSD();
+    if (!ethPriceUSD) {
+      console.error('API Route: Failed to get ETH price');
+      return NextResponse.json(
+        { error: 'Unable to validate payment at this time. Please try again.' },
+        { status: 503 }
+      );
     }
+
+    // Validate the payment transaction
+    console.log('API Route: Validating payment transaction');
+    const paymentValidation = await validatePayment(paymentTxHash, creatorAddress, ethPriceUSD);
+
+    if (!paymentValidation.valid) {
+      console.error('API Route: Payment validation failed:', paymentValidation.error);
+      return NextResponse.json(
+        { error: `Payment validation failed: ${paymentValidation.error}` },
+        { status: 402 } // 402 Payment Required
+      );
+    }
+
+    console.log('API Route: Payment validated successfully');
     
     // Convert FID to numeric
     const numericFid = Number(fid);
@@ -216,34 +239,50 @@ export async function POST(request) {
     }
     
     // Save to database
-    const result = await sql`
-      INSERT INTO collections (
-        hash,
-        fid, 
-        creator_address,
-        username,
-        collection_name, 
-        price, 
-        max_mints, 
-        image_url,
-        frame_image_url,
-        contract_address
-      ) 
-      VALUES (
-        ${collectionHash},
-        ${numericFid}, 
-        ${creatorAddress},
-        ${username},
-        ${collectionName}, 
-        ${price || '0'}, 
-        ${maxMints || null}, 
-        ${optimizedImageUrl},
-        ${frameImageUrl},
-        ${contractAddress}
-      )
-      RETURNING id, hash, username, contract_address, created_at;
-    `;
-    
+    let result;
+    try {
+      result = await sql`
+        INSERT INTO collections (
+          hash,
+          fid,
+          creator_address,
+          username,
+          collection_name,
+          price,
+          max_mints,
+          image_url,
+          frame_image_url,
+          contract_address,
+          payment_tx_hash
+        )
+        VALUES (
+          ${collectionHash},
+          ${numericFid},
+          ${creatorAddress},
+          ${username},
+          ${collectionName},
+          ${price || '0'},
+          ${maxMints || null},
+          ${optimizedImageUrl},
+          ${frameImageUrl},
+          ${contractAddress},
+          ${paymentTxHash}
+        )
+        RETURNING id, hash, username, contract_address, created_at;
+      `;
+    } catch (dbError) {
+      // Check for unique constraint violation on payment_tx_hash
+      if (dbError.code === '23505' && dbError.message?.includes('payment_tx_hash')) {
+        console.error('API Route: Payment transaction hash already used');
+        return NextResponse.json(
+          { error: 'This payment has already been used to create a collection. Please make a new payment.' },
+          { status: 409 } // 409 Conflict
+        );
+      }
+      // Re-throw other database errors
+      throw dbError;
+    }
+
     const collectionId = result.rows[0]?.id;
     const returnedHash = result.rows[0]?.hash;
     const returnedContractAddress = result.rows[0]?.contract_address;

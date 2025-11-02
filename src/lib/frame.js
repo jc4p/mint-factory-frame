@@ -1,30 +1,26 @@
-import * as frame from '@farcaster/frame-sdk'
+import { sdk } from '@farcaster/miniapp-sdk'
 
 export async function initializeFrame() {
   try {
-    const context = await frame.sdk.context
+    const context = await sdk.context
 
     if (!context || !context.user) {
       return
     }
 
-    let user = context.user
-
-    if (user.user) {
-      user = user.user
-    }
+    const user = context.user
 
     if (!user || !user.fid) {
-      // most likely not in a frame
+      // most likely not in a mini app
       return
     }
 
     window.userFid = user.fid;
 
-    // Call the ready function to remove your splash screen when in a frame
-    await frame.sdk.actions.ready();
+    // Call the ready function to remove your splash screen when in a mini app
+    await sdk.actions.ready();
   } catch (error) {
-    console.error('Error initializing Frame:', error);
+    console.error('Error initializing Mini App:', error);
   }
 }
 
@@ -40,31 +36,23 @@ function ethToWei(eth) {
 }
 
 /**
- * Opens Warpcast share intent with a specific URL and text
+ * Opens Warpcast compose dialog with a specific URL and text
  * @param {string} url - The URL to share
  * @param {string} text - The text to include in the share
  * @returns {Promise<void>}
  */
 export async function shareToWarpcast(url, text) {
   try {
-    // Encode the text and URL for the share intent
-    const encodedText = encodeURIComponent(text);
-    const encodedUrl = encodeURIComponent(url);
-    
-    // Create the Warpcast share intent URL
-    const warpcastShareUrl = `https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedUrl}`;
-    
-    // Open the URL using the frame SDK
-    try {
-      await frame.sdk.actions.openUrl(warpcastShareUrl);
-    } catch (error) {
-      await frame.sdk.actions.openUrl({ url: warpcastShareUrl });
-    }
-    
-    console.log('Opened Warpcast share intent');
+    // Use the composeCast action from the miniapp SDK
+    await sdk.actions.composeCast({
+      text: text,
+      embeds: [url]
+    });
+
+    console.log('Opened Warpcast compose dialog');
   } catch (error) {
-    console.error('Error opening Warpcast share:', error);
-    // If frame SDK fails, try regular window.open as fallback
+    console.error('Error opening Warpcast compose:', error);
+    // If mini app SDK fails, try regular window.open as fallback
     try {
       window.open(`https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(url)}`, '_blank');
     } catch (fallbackError) {
@@ -83,44 +71,44 @@ export async function shareToWarpcast(url, text) {
 export async function mintNFT(contractAddress, price, quantity = 1) {
   try {
     // First, try to switch to Base network if not already on it
-    const chainId = await frame.sdk.wallet.ethProvider.request({
+    const chainId = await sdk.wallet.ethProvider.request({
       method: 'eth_chainId'
     });
-    
+
     const chainIdDecimal = typeof chainId === 'number' ? chainId : parseInt(chainId, 16);
-    
+
     // Base Mainnet chain ID is 8453 (0x2105 in hex)
     if (chainIdDecimal !== 8453) {
       console.log(`Switching to Base network from chain ID ${chainIdDecimal}`);
-      await frame.sdk.wallet.ethProvider.request({
+      await sdk.wallet.ethProvider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x2105' }] // Base mainnet chainId
       });
     }
-    
+
     // Get the user's wallet address
-    const accounts = await frame.sdk.wallet.ethProvider.request({
+    const accounts = await sdk.wallet.ethProvider.request({
       method: 'eth_requestAccounts'
     });
-    
+
     if (!accounts || !accounts[0]) {
       throw new Error('No wallet connected');
     }
-    
+
     const walletAddress = accounts[0];
-    
+
     // Calculate the total price based on quantity
     const priceValue = parseFloat(price);
     const totalValue = priceValue * quantity;
-    
+
     // Create the mint function signature (keccak256('mint()'))
     const mintFunctionSignature = '0x1249c58b';
-    
+
     // Convert ETH to Wei for the transaction
     const weiValue = totalValue > 0 ? ethToWei(totalValue) : '0x0';
-    
+
     // Send the transaction
-    const txHash = await frame.sdk.wallet.ethProvider.request({
+    const txHash = await sdk.wallet.ethProvider.request({
       method: 'eth_sendTransaction',
       params: [{
         from: walletAddress,
@@ -129,9 +117,9 @@ export async function mintNFT(contractAddress, price, quantity = 1) {
         value: weiValue
       }]
     });
-    
+
     console.log('Mint transaction sent:', txHash);
-    
+
     return {
       success: true,
       txHash: txHash
@@ -149,49 +137,49 @@ export async function sendPaymentForCollection(ethPriceUSD) {
   try {
     // Target address to send payment to
     const targetAddress = '0x0db12C0A67bc5B8942ea3126a465d7a0b23126C7';
-    
-    // Hard-coded payment of $10 USD
-    const paymentAmountUSD = 10;
-    
+
+    // Hard-coded payment of $5 USD
+    const paymentAmountUSD = 5;
+
     // Make sure ethPriceUSD is valid
     if (!ethPriceUSD || isNaN(parseFloat(ethPriceUSD)) || parseFloat(ethPriceUSD) <= 0) {
       throw new Error('Invalid ETH price');
     }
-    
+
     // Calculate ETH amount based on current price
     const ethAmount = paymentAmountUSD / parseFloat(ethPriceUSD);
     console.log(`Payment: $${paymentAmountUSD} USD at ETH price $${ethPriceUSD} = ${ethAmount} ETH`);
-    
+
     // First, try to switch to Base network if not already on it
-    const chainId = await frame.sdk.wallet.ethProvider.request({
+    const chainId = await sdk.wallet.ethProvider.request({
       method: 'eth_chainId'
     });
-    
+
     const chainIdDecimal = typeof chainId === 'number' ? chainId : parseInt(chainId, 16);
-    
+
     // Base Mainnet chain ID is 8453 (0x2105 in hex)
     if (chainIdDecimal !== 8453) {
       console.log(`Switching to Base network from chain ID ${chainIdDecimal}`);
-      await frame.sdk.wallet.ethProvider.request({
+      await sdk.wallet.ethProvider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: '0x2105' }] // Base mainnet chainId
       });
     }
-    
+
     // Get the user's wallet address
-    const accounts = await frame.sdk.wallet.ethProvider.request({
+    const accounts = await sdk.wallet.ethProvider.request({
       method: 'eth_requestAccounts'
     });
-    
+
     if (!accounts || !accounts[0]) {
       throw new Error('No wallet connected');
     }
-    
+
     // Convert ETH to Wei
     const weiValue = ethToWei(ethAmount);
-    
+
     // Send transaction
-    const txHash = await frame.sdk.wallet.ethProvider.request({
+    const txHash = await sdk.wallet.ethProvider.request({
       method: 'eth_sendTransaction',
       params: [{
         from: accounts[0],
@@ -199,9 +187,9 @@ export async function sendPaymentForCollection(ethPriceUSD) {
         value: weiValue
       }]
     });
-    
+
     console.log('Payment transaction sent:', txHash);
-    
+
     return {
       success: true,
       txHash: txHash
@@ -217,85 +205,31 @@ export async function sendPaymentForCollection(ethPriceUSD) {
 
 /**
  * Checks if minting is available for a collection and returns total supply
+ * Uses the backend API endpoint instead of direct eth_call (which miniapp SDK doesn't support)
  * @param {string} contractAddress - The contract address to interact with
  * @returns {Promise<{success: boolean, hasMintingAvailable?: boolean, totalSupply?: string, error?: string}>}
  */
 export async function checkMintingAvailability(contractAddress) {
   try {
-    // First, try to switch to Base network if not already on it
-    const chainId = await frame.sdk.wallet.ethProvider.request({
-      method: 'eth_chainId'
-    });
-    
-    const chainIdDecimal = typeof chainId === 'number' ? chainId : parseInt(chainId, 16);
-    
-    // Base Mainnet chain ID is 8453 (0x2105 in hex)
-    if (chainIdDecimal !== 8453) {
-      console.log(`Switching to Base network from chain ID ${chainIdDecimal}`);
-      await frame.sdk.wallet.ethProvider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x2105' }] // Base mainnet chainId
-      });
+    // Call our backend API endpoint to check minting availability
+    const response = await fetch(`/api/contract/check-minting?address=${contractAddress}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to check minting availability');
     }
-    
-    // Get the user's wallet address
-    const accounts = await frame.sdk.wallet.ethProvider.request({
-      method: 'eth_requestAccounts'
+
+    const data = await response.json();
+
+    console.log('Minting availability check:', {
+      hasMintingAvailable: data.hasMintingAvailable,
+      totalSupply: data.totalSupply
     });
-    
-    if (!accounts || !accounts[0]) {
-      throw new Error('No wallet connected');
-    }
-    
-    // Create the mintingAvailable function signature (keccak256('mintingAvailable()'))
-    const mintingAvailableFunctionSignature = '0x8a2daaf7';
-    
-    // Call the contract method for mintingAvailable
-    const mintingAvailableResult = await frame.sdk.wallet.ethProvider.request({
-      method: 'eth_call',
-      params: [{
-        from: accounts[0],
-        to: contractAddress,
-        data: mintingAvailableFunctionSignature
-      }, 'latest']
-    });
-    
-    console.log('Raw result from mintingAvailable:', mintingAvailableResult);
-    
-    // Parse the result (it's a tuple of bool and uint256)
-    // The first 32 bytes are the bool
-    const hasMintingAvailable = mintingAvailableResult.substring(0, 66) === '0x0000000000000000000000000000000000000000000000000000000000000001';
-    
-    // Create the totalSupply function signature (keccak256('totalSupply()'))
-    const totalSupplyFunctionSignature = '0x18160ddd';
-    
-    // Call the contract method for totalSupply
-    const totalSupplyResult = await frame.sdk.wallet.ethProvider.request({
-      method: 'eth_call',
-      params: [{
-        from: accounts[0],
-        to: contractAddress,
-        data: totalSupplyFunctionSignature
-      }, 'latest']
-    });
-    
-    console.log('Raw result from totalSupply:', totalSupplyResult);
-    
-    // Parse the totalSupply result
-    let totalSupply;
-    try {
-      totalSupply = BigInt(totalSupplyResult).toString();
-    } catch (error) {
-      console.error('Error parsing totalSupply:', error);
-      totalSupply = "0"; // Default to 0 if parsing fails
-    }
-    
-    console.log('Minting availability check:', { hasMintingAvailable, totalSupply });
-    
+
     return {
-      success: true,
-      hasMintingAvailable,
-      totalSupply
+      success: data.success,
+      hasMintingAvailable: data.hasMintingAvailable,
+      totalSupply: data.totalSupply
     };
   } catch (error) {
     console.error('Error checking minting availability:', error);

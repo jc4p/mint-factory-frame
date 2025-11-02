@@ -1,6 +1,8 @@
 import NFTCreator from '../components/NFTCreator';
 import { getEthPriceUSD } from '@/lib/ethPrice';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'NFT Factory',
   description: 'Create your own NFT collection',

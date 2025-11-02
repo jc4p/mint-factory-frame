@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS collections (
   image_url TEXT NOT NULL,
   frame_image_url TEXT,
   contract_address VARCHAR(42),
+  payment_tx_hash VARCHAR(66) NULL UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
