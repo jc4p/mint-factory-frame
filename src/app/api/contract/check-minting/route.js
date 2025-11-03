@@ -104,8 +104,11 @@ export async function GET(request) {
     }
 
     // Parse mintingAvailable result (bool)
+    // Note: mintingAvailable() returns a tuple (bool, uint256) = 64 bytes total
+    // We only need the first 32 bytes (the bool value)
     const mintingAvailableResult = mintingAvailableData.result;
-    const hasMintingAvailable = mintingAvailableResult === '0x0000000000000000000000000000000000000000000000000000000000000001';
+    const boolValue = mintingAvailableResult.substring(0, 66); // 0x + 64 hex chars = first 32 bytes
+    const hasMintingAvailable = boolValue === '0x0000000000000000000000000000000000000000000000000000000000000001';
 
     // Parse totalSupply result (uint256)
     let totalSupply;
